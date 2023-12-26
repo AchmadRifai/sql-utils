@@ -51,7 +51,9 @@ func rowsToMaps(rows *sql.Rows) ([]map[string]string, []string) {
 
 func rowResurect(rows *sql.Rows) {
 	NormalError()
-	if err := rows.Close(); err != nil {
-		panic(err)
+	if rows != nil {
+		if err := rows.Close(); err != nil {
+			panic(err)
+		}
 	}
 }

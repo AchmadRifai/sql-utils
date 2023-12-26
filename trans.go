@@ -34,11 +34,17 @@ func (t *Transaction) txDone(tx *sql.Tx) {
 	if r := recover(); r != nil {
 		log.Println("Error catched", r)
 		log.Println("stack trace", string(debug.Stack()))
-		if err := tx.Rollback(); err != nil {
-			panic(err)
+		if tx != nil {
+			if err := tx.Rollback(); err != nil {
+				panic(err)
+			}
 		}
-	} else if err := tx.Commit(); err != nil {
-		panic(err)
+	} else {
+		if tx != nil {
+			if err := tx.Commit(); err != nil {
+				panic(err)
+			}
+		}
 	}
 }
 
