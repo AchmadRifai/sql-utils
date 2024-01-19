@@ -2,11 +2,9 @@ package sqlutils
 
 import (
 	"database/sql"
-	"fmt"
-	"reflect"
 )
 
-func DbSelect(db *sql.DB, query string, args ...any) ([]map[string]string, []string) {
+func DbSelect(db *sql.DB, query string, args ...any) ([]map[string]interface{}, []string) {
 	rows, err := db.Query(query, args...)
 	defer rowResurect(rows)
 	if err != nil {
@@ -15,15 +13,15 @@ func DbSelect(db *sql.DB, query string, args ...any) ([]map[string]string, []str
 	return rowsToMaps(rows)
 }
 
-func rowsToMaps(rows *sql.Rows) ([]map[string]string, []string) {
-	var datas []map[string]string
+func rowsToMaps(rows *sql.Rows) ([]map[string]interface{}, []string) {
+	var datas []map[string]interface{}
 	cols, err := rows.Columns()
 	if err != nil {
 		panic(err)
 	}
 	for rows.Next() {
 		scans := make([]interface{}, len(cols))
-		row := make(map[string]string)
+		row := make(map[string]interface{})
 		for i := range scans {
 			scans[i] = &scans[i]
 		}
@@ -31,15 +29,9 @@ func rowsToMaps(rows *sql.Rows) ([]map[string]string, []string) {
 			panic(err)
 		}
 		for i, v := range scans {
-			value := ""
 			if v != nil {
-				if reflect.TypeOf(v).String() == "string" || reflect.TypeOf(v).String() == "[]uint8" {
-					value = fmt.Sprintf("%s", v)
-				} else {
-					value = fmt.Sprintf("%v", v)
-				}
+				row[cols[i]] = v
 			}
-			row[cols[i]] = value
 		}
 		datas = append(datas, row)
 	}
